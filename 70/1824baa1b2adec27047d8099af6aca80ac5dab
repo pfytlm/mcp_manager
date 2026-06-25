@@ -1,0 +1,71 @@
+README.md
+  s_b631ed8d073973::t_98c98f0a70dc37 1-370 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a3d33340d7db7d58d67bcb9","tool_type":"agent","tool_id":"RunCommand","line_ranges":[{"Range":[1,370]}]}]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "701824baa1b2adec27047d8099af6aca80ac5dab",
+  "prompts": {},
+  "humans": {
+    "h_3b679923a23d86": {
+      "author": "yechen123 <yechen123@bytedance.com>"
+    }
+  },
+  "sessions": {
+    "s_b631ed8d073973": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a3b3c210d7db7d58d67aa99",
+        "model": "Doubao-Seed-2.1-Turbo__dev"
+      },
+      "human_author": "pfytlm <pfytlm19880622@163.com>"
+    }
+  },
+  "attestation_metadata": {
+    "README.md": [
+      {
+        "hash": "s_b631ed8d073973::t_98c98f0a70dc37",
+        "line_ranges": [
+          {
+            "Range": [
+              1,
+              370
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a3d33340d7db7d58d67bcb9",
+            "tool_type": "agent",
+            "tool_id": "RunCommand",
+            "line_ranges": [
+              {
+                "Range": [
+                  1,
+                  370
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "s_b631ed8d073973": {
+      "tool": "trae",
+      "conversation_id": "6a3b3c210d7db7d58d67aa99",
+      "session_id": "6a3b3c210d7db7d58d67aa99",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    },
+    "s_b631ed8d073973::t_98c98f0a70dc37": {
+      "tool": "trae",
+      "conversation_id": "6a3b3c210d7db7d58d67aa99",
+      "session_id": "6a3b3c210d7db7d58d67aa99",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
