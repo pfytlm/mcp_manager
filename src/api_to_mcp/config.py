@@ -30,10 +30,12 @@ class PlatformConfig:
     TODO_MCP_HOST: str = os.getenv("TODO_MCP_HOST", "127.0.0.1")
     TODO_MCP_PORT: int = int(os.getenv("TODO_MCP_PORT", "8001"))
     TODO_MCP_SCHEME: str = os.getenv("TODO_MCP_SCHEME", "http")
+    TODO_MCP_PATH: str = os.getenv("TODO_MCP_PATH", "/todo")
 
     CALC_MCP_HOST: str = os.getenv("CALC_MCP_HOST", "127.0.0.1")
-    CALC_MCP_PORT: int = int(os.getenv("CALC_MCP_PORT", "8003"))
+    CALC_MCP_PORT: int = int(os.getenv("CALC_MCP_PORT", "8001"))
     CALC_MCP_SCHEME: str = os.getenv("CALC_MCP_SCHEME", "http")
+    CALC_MCP_PATH: str = os.getenv("CALC_MCP_PATH", "/calc")
 
     SSL_CERT_PATH: str = os.getenv("SSL_CERT_PATH", "certs/localhost.crt")
     SSL_KEY_PATH: str = os.getenv("SSL_KEY_PATH", "certs/localhost.key")
@@ -52,11 +54,13 @@ class PlatformConfig:
 
     @property
     def todo_mcp_url(self) -> str:
-        return f"{self.TODO_MCP_SCHEME}://{self.TODO_MCP_HOST}:{self.TODO_MCP_PORT}/mcp"
+        path = self.TODO_MCP_PATH.rstrip("/")
+        return f"{self.TODO_MCP_SCHEME}://{self.TODO_MCP_HOST}:{self.TODO_MCP_PORT}{path}/mcp"
 
     @property
     def calc_mcp_url(self) -> str:
-        return f"{self.CALC_MCP_SCHEME}://{self.CALC_MCP_HOST}:{self.CALC_MCP_PORT}/mcp"
+        path = self.CALC_MCP_PATH.rstrip("/")
+        return f"{self.CALC_MCP_SCHEME}://{self.CALC_MCP_HOST}:{self.CALC_MCP_PORT}{path}/mcp"
 
     def get_ssl_context(self):
         if not self.ENABLE_HTTPS:
