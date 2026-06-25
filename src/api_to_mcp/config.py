@@ -19,48 +19,37 @@ class PlatformConfig:
     PLATFORM_SCHEME: str = os.getenv("PLATFORM_SCHEME", "http")
     ENABLE_HTTPS: bool = os.getenv("ENABLE_HTTPS", "false").lower() == "true"
 
-    TODO_API_HOST: str = os.getenv("TODO_API_HOST", "127.0.0.1")
-    TODO_API_PORT: int = int(os.getenv("TODO_API_PORT", "8000"))
-    TODO_API_SCHEME: str = os.getenv("TODO_API_SCHEME", "http")
-
-    CALC_API_HOST: str = os.getenv("CALC_API_HOST", "127.0.0.1")
-    CALC_API_PORT: int = int(os.getenv("CALC_API_PORT", "8002"))
-    CALC_API_SCHEME: str = os.getenv("CALC_API_SCHEME", "http")
-
-    TODO_MCP_HOST: str = os.getenv("TODO_MCP_HOST", "127.0.0.1")
-    TODO_MCP_PORT: int = int(os.getenv("TODO_MCP_PORT", "8001"))
-    TODO_MCP_SCHEME: str = os.getenv("TODO_MCP_SCHEME", "http")
-    TODO_MCP_PATH: str = os.getenv("TODO_MCP_PATH", "/todo")
-
-    CALC_MCP_HOST: str = os.getenv("CALC_MCP_HOST", "127.0.0.1")
-    CALC_MCP_PORT: int = int(os.getenv("CALC_MCP_PORT", "8001"))
-    CALC_MCP_SCHEME: str = os.getenv("CALC_MCP_SCHEME", "http")
-    CALC_MCP_PATH: str = os.getenv("CALC_MCP_PATH", "/calc")
+    TODO_MCP_PATH: str = os.getenv("TODO_MCP_PATH", "/mcp/todo")
+    CALC_MCP_PATH: str = os.getenv("CALC_MCP_PATH", "/mcp/calc")
 
     SSL_CERT_PATH: str = os.getenv("SSL_CERT_PATH", "certs/localhost.crt")
     SSL_KEY_PATH: str = os.getenv("SSL_KEY_PATH", "certs/localhost.key")
 
     @property
     def platform_url(self) -> str:
+        port = self.PLATFORM_PORT
+        if (self.PLATFORM_SCHEME == "https" and port == 443) or \
+           (self.PLATFORM_SCHEME == "http" and port == 80):
+            return f"{self.PLATFORM_SCHEME}://{self.PLATFORM_HOST}"
         return f"{self.PLATFORM_SCHEME}://{self.PLATFORM_HOST}:{self.PLATFORM_PORT}"
 
     @property
     def todo_api_url(self) -> str:
-        return f"{self.TODO_API_SCHEME}://{self.TODO_API_HOST}:{self.TODO_API_PORT}"
+        return f"{self.platform_url}/api/todo"
 
     @property
     def calc_api_url(self) -> str:
-        return f"{self.CALC_API_SCHEME}://{self.CALC_API_HOST}:{self.CALC_API_PORT}"
+        return f"{self.platform_url}/api/calc"
 
     @property
     def todo_mcp_url(self) -> str:
         path = self.TODO_MCP_PATH.rstrip("/")
-        return f"{self.TODO_MCP_SCHEME}://{self.TODO_MCP_HOST}:{self.TODO_MCP_PORT}{path}/mcp"
+        return f"{self.platform_url}{path}"
 
     @property
     def calc_mcp_url(self) -> str:
         path = self.CALC_MCP_PATH.rstrip("/")
-        return f"{self.CALC_MCP_SCHEME}://{self.CALC_MCP_HOST}:{self.CALC_MCP_PORT}{path}/mcp"
+        return f"{self.platform_url}{path}"
 
     def get_ssl_context(self):
         if not self.ENABLE_HTTPS:
