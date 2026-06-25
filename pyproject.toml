@@ -1,0 +1,38 @@
+[project]
+name = "mcp_manager"
+version = "1.0.0"
+description = "MCP Service Manager - 管理和测试MCP服务的完整框架"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.32.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+    "typer>=0.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/api_to_mcp"]
+
+[project.scripts]
+api-to-mcp = "api_to_mcp.cli:app"
+todo-api = "api_to_mcp.examples.todo_api:main"
+todo-mcp = "api_to_mcp.examples.todo_mcp:main"
+calc-api = "api_to_mcp.examples.calc_api:main"
+calc-mcp = "api_to_mcp.examples.calc_mcp:main"
+mcp-ui = "api_to_mcp.manager:main"
+todo-mcp-sse = "api_to_mcp.sse_server:run_todo_sse"
+calc-mcp-sse = "api_to_mcp.sse_server:run_calc_sse"

@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP 服务管理控制台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --get: #22c55e;
+            --post: #3b82f6;
+            --put: #f59e0b;
+            --delete: #ef4444;
+            --patch: #8b5cf6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-card) 0%, #1a1f3a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+        }
+
+        .service-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .service-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .service-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, var(--bg-card) 100%);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .service-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .service-badges {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-get { background: rgba(34, 197, 94, 0.2); color: var(--get); }
+        .badge-post { background: rgba(59, 130, 246, 0.2); color: var(--post); }
+        .badge-put { background: rgba(245, 158, 11, 0.2); color: var(--put); }
+        .badge-delete { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-patch { background: rgba(139, 92, 246, 0.2); color: var(--patch); }
+        .badge-auth { background: rgba(16, 185, 129, 0.2); color: var(--secondary); }
+
+        .service-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .service-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .service-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+            border-radius: 4px;
+        }
+
+        .main-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+        }
+
+        .detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .info-value code {
+            background: rgba(99, 102, 241, 0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--primary-light);
+            font-size: 0.85rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            gap: 0.25rem;
+        }
+
+        .tab {
+            padding: 1rem 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--primary-light);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-count {
+            background: var(--bg-hover);
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .tool-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .tool-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .tool-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .method-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .method-GET { background: rgba(34, 197, 94, 0.2); color: var(--get); }
+        .method-POST { background: rgba(59, 130, 246, 0.2); color: var(--post); }
+        .method-PUT { background: rgba(245, 158, 11, 0.2); color: var(--put); }
+        .method-DELETE { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .method-PATCH { background: rgba(139, 92, 246, 0.2); color: var(--patch); }
+
+        .tool-path {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .tool-name {
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-left: auto;
+        }
+
+        .tool-expand-icon {
+            color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+
+        .tool-item.expanded .tool-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .tool-body {
+            display: none;
+            padding: 0 1.25rem 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .tool-item.expanded .tool-body {
+            display: block;
+        }
+
+        .tool-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: rgba(99, 102, 241, 0.08);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .params-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .params-table th {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .params-table td {
+            padding: 0.6rem 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .param-name {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .param-type {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--info);
+            font-size: 0.8rem;
+        }
+
+        .param-required {
+            color: var(--danger);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .param-optional {
+            color: var(--text-dim);
+            font-size: 0.7rem;
+        }
+
+        .param-desc {
+            color: var(--text-muted);
+        }
+
+        .location-badge {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            background: rgba(100, 116, 139, 0.3);
+            color: var(--text-muted);
+        }
+
+        .schema-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            color: var(--text-muted);
+        }
+
+        .resource-item, .prompt-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-name, .prompt-name {
+            font-weight: 600;
+            color: var(--secondary);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin-bottom: 0.35rem;
+        }
+
+        .resource-uri {
+            font-size: 0.8rem;
+            color: var(--primary-light);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-desc, .prompt-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .instructions-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-dim);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .copy-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border: none;
+            color: var(--primary-light);
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .test-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .test-type-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .test-type-tab {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .test-type-tab:hover {
+            background: var(--sidebar-hover);
+            color: var(--text-color);
+        }
+        .test-type-tab.active {
+            background: var(--accent-color);
+            color: white;
+        }
+        .test-selector {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .test-selector select {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .test-selector select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .test-params-section {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .test-params-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .param-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .param-row {
+            display: grid;
+            grid-template-columns: 140px 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+        .param-row label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .param-row input, .param-row select {
+            padding: 6px 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+        }
+        .param-row input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .param-required-mark {
+            color: #ff6b6b;
+            margin-left: 4px;
+        }
+        .raw-json-editor {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+        .test-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background: var(--sidebar-hover);
+        }
+        .test-result {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .test-result-header {
+            padding: 12px 16px;
+            background: rgba(139, 92, 246, 0.1);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-result-status {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .status-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .status-loading {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+        .test-result-body {
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .result-text {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            font-size: 0.85rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        .result-markdown h1, .result-markdown h2, .result-markdown h3 {
+            margin: 16px 0 8px 0;
+            color: var(--text-color);
+        }
+        .result-markdown h1 { font-size: 1.3rem; }
+        .result-markdown h2 { font-size: 1.1rem; }
+        .result-markdown h3 { font-size: 1rem; }
+        .result-markdown p { margin: 8px 0; }
+        .result-markdown ul, .result-markdown ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        .result-markdown li { margin: 4px 0; }
+        .result-markdown code {
+            background: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .result-markdown strong {
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🔌</div>
+                <div>
+                    <div>MCP 服务管理控制台</div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim); font-weight: 400;">Model Context Protocol Services</div>
+                </div>
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <div class="stat-value" id="statServices">-</div>
+                    <div class="stat-label">服务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTools">-</div>
+                    <div class="stat-label">工具</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statResources">-</div>
+                    <div class="stat-label">资源</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statPrompts">-</div>
+                    <div class="stat-label">提示词</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="搜索MCP服务...">
+            </div>
+            <div class="service-list" id="serviceList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    加载中...
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h2 style="margin-bottom: 0.5rem; color: var(--text);">选择一个MCP服务</h2>
+                <p>从左侧列表中选择一个服务查看详细配置</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let services = [];
+        let selectedService = null;
+        let activeTab = 'tools';
+        let expandedTools = new Set();
+
+        const methodColors = {
+            GET: 'get',
+            POST: 'post',
+            PUT: 'put',
+            DELETE: 'delete',
+            PATCH: 'patch'
+        };
+
+        async function fetchServices() {
+            try {
+                const res = await fetch('/api/services');
+                const data = await res.json();
+                services = data.services;
+                updateStats(data);
+                renderServiceList();
+                if (services.length > 0 && !selectedService) {
+                    selectService(services[0].name);
+                }
+            } catch (e) {
+                document.getElementById('serviceList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>加载失败: ${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats(data) {
+            const totalTools = data.services.reduce((sum, s) => sum + s.tools.length, 0);
+            const totalResources = data.services.reduce((sum, s) => sum + s.resources.length, 0);
+            const totalPrompts = data.services.reduce((sum, s) => sum + s.prompts.length, 0);
+
+            document.getElementById('statServices').textContent = data.total;
+            document.getElementById('statTools').textContent = totalTools;
+            document.getElementById('statResources').textContent = totalResources;
+            document.getElementById('statPrompts').textContent = totalPrompts;
+        }
+
+        function renderServiceList() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = services.filter(s =>
+                s.name.toLowerCase().includes(searchTerm) ||
+                s.description.toLowerCase().includes(searchTerm) ||
+                s.tags.some(t => t.toLowerCase().includes(searchTerm))
+            );
+
+            const html = filtered.map(service => `
+                <div class="service-card ${selectedService === service.name ? 'active' : ''}"
+                     onclick="selectService('${service.name}')">
+                    <div class="service-card-header">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-badges">
+                            <span class="badge badge-${methodColors[service.tools[0]?.method] || 'get'}">${service.tools.length} 工具</span>
+                            ${service.has_auth ? '<span class="badge badge-auth">🔐</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="service-desc">${service.description}</div>
+                    <div class="service-meta">
+                        <span>🔧 ${service.tools.length} 工具</span>
+                        <span>📦 ${service.resources.length} 资源</span>
+                        <span>💬 ${service.prompts.length} 提示词</span>
+                    </div>
+                    ${service.tags.length > 0 ? `
+                        <div class="tag-list">
+                            ${service.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('serviceList').innerHTML = html || `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <p>未找到匹配的服务</p>
+                </div>
+            `;
+        }
+
+        function selectService(name) {
+            selectedService = name;
+            activeTab = 'tools';
+            expandedTools.clear();
+            renderServiceList();
+            renderServiceDetail();
+        }
+
+        function renderServiceDetail() {
+            const service = services.find(s => s.name === selectedService);
+            if (!service) return;
+
+            document.getElementById('mainContent').innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-title">
+                        ${service.name}
+                        ${service.has_auth ? '<span class="badge badge-auth" style="margin-left: 0.5rem; font-size: 0.75rem;">🔐 需要认证</span>' : ''}
+                    </div>
+                    <div class="detail-desc">${service.description}</div>
+                    <div class="detail-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">MCP 地址</span>
+                            <span class="info-value" title="${service.base_url}"><code>${service.base_url}</code></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">传输方式</span>
+                            <span class="info-value"><code>${service.transport}</code></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">认证方式</span>
+                            <span class="info-value">${service.auth_type || '<span style="color: var(--text-dim);">无</span>'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">标签</span>
+                            <span class="info-value">${service.tags.map(t => `<span class="tag">${t}</span>`).join(' ') || '<span style="color: var(--text-dim);">无</span>'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab ${activeTab === 'tools' ? 'active' : ''}" onclick="switchTab('tools')">
+                        🔧 工具 <span class="tab-count">${service.tools.length}</span>
+                    </button>
+                    <button class="tab ${activeTab === 'resources' ? 'active' : ''}" onclick="switchTab('resources')">
+                        📦 资源 <span class="tab-count">${service.resources.length}</span>
+                    </button>
+                    <button class="tab ${activeTab === 'prompts' ? 'active' : ''}" onclick="switchTab('prompts')">
+                        💬 提示词 <span class="tab-count">${service.prompts.length}</span>
+                    </button>
+                    <button class="tab ${activeTab === 'test' ? 'active' : ''}" onclick="switchTab('test')">
+                        🧪 请求测试
+                    </button>
+                    <button class="tab ${activeTab === 'config' ? 'active' : ''}" onclick="switchTab('config')">
+                        ⚙️ 配置
+                    </button>
+                </div>
+
+                <div class="tab-content" id="tabContent">
+                    ${renderTabContent(service)}
+                </div>
+            `;
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            renderServiceDetail();
+        }
+
+        function toggleTool(toolName) {
+            if (expandedTools.has(toolName)) {
+                expandedTools.delete(toolName);
+            } else {
+                expandedTools.add(toolName);
+            }
+            renderServiceDetail();
+        }
+
+        function renderTabContent(service) {
+            switch (activeTab) {
+                case 'tools':
+                    return renderTools(service.tools);
+                case 'resources':
+                    return renderResources(service.resources);
+                case 'prompts':
+                    return renderPrompts(service.prompts);
+                case 'test':
+                    return renderTestPanel(service);
+                case 'config':
+                    return renderConfig(service);
+                default:
+                    return '';
+            }
+        }
+
+        function renderTools(tools) {
+            return tools.map(tool => {
+                const isExpanded = expandedTools.has(tool.name);
+                return `
+                    <div class="tool-item ${isExpanded ? 'expanded' : ''}">
+                        <div class="tool-header" onclick="toggleTool('${tool.name}')">
+                            <span class="method-badge method-${tool.method}">${tool.method}</span>
+                            <span class="tool-path">${tool.path}</span>
+                            <span class="tool-name">${tool.name}</span>
+                            <span class="tool-expand-icon">▼</span>
+                        </div>
+                        <div class="tool-body">
+                            <div class="tool-desc">${tool.description}</div>
+
+                            <div class="section-title">参数列表</div>
+                            ${tool.parameters.length > 0 ? `
+                                <table class="params-table">
+                                    <thead>
+                                        <tr>
+                                            <th>参数名</th>
+                                            <th>位置</th>
+                                            <th>类型</th>
+                                            <th>必填</th>
+                                            <th>说明</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${tool.parameters.map(p => `
+                                            <tr>
+                                                <td><span class="param-name">${p.name}</span></td>
+                                                <td><span class="location-badge">${p.location || 'body'}</span></td>
+                                                <td><span class="param-type">${p.type}</span></td>
+                                                <td>${p.required ? '<span class="param-required">必填</span>' : '<span class="param-optional">可选</span>'}</td>
+                                                <td class="param-desc">${p.description}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            ` : '<p style="color: var(--text-dim); font-size: 0.85rem;">此工具无需参数</p>'}
+
+                            <div class="section-title">输入 Schema (JSON Schema)</div>
+                            <div class="schema-box">${JSON.stringify(tool.input_schema, null, 2)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderResources(resources) {
+            if (resources.length === 0) {
+                return '<div class="empty-state"><p>此服务暂无资源</p></div>';
+            }
+            return resources.map(res => `
+                <div class="resource-item">
+                    <div class="resource-name">📄 ${res.name}</div>
+                    <div class="resource-uri">${res.uri}</div>
+                    <div class="resource-desc">${res.description || '无描述'}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderPrompts(prompts) {
+            if (prompts.length === 0) {
+                return '<div class="empty-state"><p>此服务暂无提示词模板</p></div>';
+            }
+            return prompts.map(p => `
+                <div class="prompt-item">
+                    <div class="prompt-name">💬 ${p.name}</div>
+                    <div class="prompt-desc">${p.description || '无描述'}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderConfig(service) {
+            return `
+                <div class="section-title">服务配置 (JSON)</div>
+                <div class="schema-box" style="position: relative;">
+                    <button class="copy-btn" style="position: absolute; top: 0.75rem; right: 0.75rem;" onclick="copyConfig()">📋 复制</button>
+                    ${JSON.stringify({
+                        name: service.name,
+                        description: service.description,
+                        base_url: service.base_url,
+                        transport: service.transport,
+                        has_auth: service.has_auth,
+                        auth_type: service.auth_type,
+                        tags: service.tags,
+                        tools_count: service.tools.length,
+                        resources_count: service.resources.length,
+                        prompts_count: service.prompts.length,
+                    }, null, 2)}
+                </div>
+
+                <div class="section-title" style="margin-top: 1.5rem;">AI 助手系统提示词 (Instructions)</div>
+                <div class="instructions-box">${service.instructions || '未配置系统提示词'}</div>
+            `;
+        }
+
+        function copyConfig() {
+            const service = services.find(s => s.name === selectedService);
+            if (service) {
+                navigator.clipboard.writeText(JSON.stringify(service, null, 2));
+            }
+        }
+
+        // ============================================================
+        // 🔬 MCP请求测试工具
+        // ============================================================
+        let testType = 'tool'; // tool | resource | prompt
+        let selectedTestItem = '';
+        let testResult = null;
+        let testLoading = false;
+        let lastCurlCommand = '';
+
+        function switchTestType(type) {
+            testType = type;
+            selectedTestItem = '';
+            testResult = null;
+            renderServiceDetail();
+        }
+
+        function renderTestPanel(service) {
+            const items = getTestItems(service);
+            const currentItem = getCurrentTestItem(service);
+
+            return `
+                <div class="test-panel">
+                    <div class="test-type-tabs">
+                        <button class="test-type-tab ${testType === 'tool' ? 'active' : ''}" onclick="switchTestType('tool')">
+                            🔧 调用工具
+                        </button>
+                        <button class="test-type-tab ${testType === 'resource' ? 'active' : ''}" onclick="switchTestType('resource')">
+                            📦 读取资源
+                        </button>
+                        <button class="test-type-tab ${testType === 'prompt' ? 'active' : ''}" onclick="switchTestType('prompt')">
+                            💬 获取提示词
+                        </button>
+                    </div>
+
+                    <div class="test-selector">
+                        <select onchange="onSelectTestItem(this.value)">
+                            <option value="">-- 选择${getTestTypeLabel()} --</option>
+                            ${items.map(item => `
+                                <option value="${item.value}" ${selectedTestItem === item.value ? 'selected' : ''}>
+                                    ${item.label}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    ${selectedTestItem ? `
+                        <div class="test-params-section">
+                            <div class="test-params-title">
+                                <span>参数配置</span>
+                                <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;" onclick="toggleRawJson()">
+                                    ${showRawJson ? '可视化编辑' : '原始JSON'}
+                                </button>
+                            </div>
+                            ${renderTestParamsEditor(currentItem)}
+                        </div>
+
+                        <div class="test-actions">
+                            <button class="btn btn-primary" ${testLoading ? 'disabled' : ''} onclick="runTest()">
+                                ${testLoading ? '请求中...' : '🚀 发送请求'}
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetTest()">重置</button>
+                        </div>
+                    ` : `
+                        <div class="empty-state">
+                            <p>请从上方选择一个${getTestTypeLabel()}开始测试</p>
+                        </div>
+                    `}
+
+                    ${testResult ? renderTestResult() : ''}
+                </div>
+            `;
+        }
+
+        let showRawJson = false;
+        let paramValues = {};
+
+        function toggleRawJson() {
+            showRawJson = !showRawJson;
+            renderServiceDetail();
+        }
+
+        function getTestTypeLabel() {
+            return { tool: '工具', resource: '资源', prompt: '提示词' }[testType];
+        }
+
+        function getTestItems(service) {
+            if (testType === 'tool') {
+                return service.tools.map(t => ({ value: t.name, label: `${t.method} - ${t.name}` }));
+            } else if (testType === 'resource') {
+                return service.resources.map(r => ({ value: r.uri, label: r.name }));
+            } else {
+                return service.prompts.map(p => ({ value: p.name, label: p.name }));
+            }
+        }
+
+        function getCurrentTestItem(service) {
+            if (testType === 'tool') {
+                return service.tools.find(t => t.name === selectedTestItem);
+            } else if (testType === 'resource') {
+                return service.resources.find(r => r.uri === selectedTestItem);
+            } else {
+                return service.prompts.find(p => p.name === selectedTestItem);
+            }
+        }
+
+        function onSelectTestItem(value) {
+            selectedTestItem = value;
+            paramValues = {};
+            testResult = null;
+            showRawJson = false;
+            renderServiceDetail();
+        }
+
+        function renderTestParamsEditor(item) {
+            if (!item) return '';
+
+            if (testType === 'resource') {
+                return '<p style="color: var(--text-dim); font-size: 0.85rem;">资源读取无需参数</p>';
+            }
+
+            const params = testType === 'tool' ? (item.parameters || []) : (item.arguments || []);
+
+            if (params.length === 0) {
+                return '<p style="color: var(--text-dim); font-size: 0.85rem;">此' + getTestTypeLabel() + '无需参数</p>';
+            }
+
+            if (showRawJson) {
+                const json = JSON.stringify(paramValues, null, 2);
+                return `
+                    <textarea class="raw-json-editor" id="rawJsonEditor" onchange="onRawJsonChange(this.value)">${json}</textarea>
+                `;
+            }
+
+            return `
+                <div class="param-editor">
+                    ${params.map(p => {
+                        const val = paramValues[p.name] !== undefined ? paramValues[p.name] : (p.default || '');
+                        const isBool = p.type === 'boolean';
+                        const isArray = p.type === 'array' || p.type === 'list';
+                        return `
+                            <div class="param-row">
+                                <label>${p.name}${p.required ? '<span class="param-required-mark">*</span>' : ''}
+                                    <br><span style="font-size: 0.75rem; color: var(--text-dim);">${p.type || 'string'}</span>
+                                </label>
+                                ${isBool ? `
+                                    <select onchange="onParamChange('${p.name}', this.value === 'true')">
+                                        <option value="false" ${val === false ? 'selected' : ''}>false</option>
+                                        <option value="true" ${val === true ? 'selected' : ''}>true</option>
+                                    </select>
+                                ` : isArray ? `
+                                    <input type="text" value="${Array.isArray(val) ? val.join(', ') : val}"
+                                        placeholder="逗号分隔多个值"
+                                        onchange="onParamChange('${p.name}', this.value.split(',').map(s => s.trim()).filter(Boolean))">
+                                ` : `
+                                    <input type="text" value="${val}" placeholder="${p.description || ''}"
+                                        onchange="onParamChange('${p.name}', this.value)">
+                                `}
+                                <span style="font-size: 0.75rem; color: var(--text-dim); width: 100px; text-align: right;">
+                                    ${p.location || ''}
+                                </span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function onParamChange(name, value) {
+            paramValues[name] = value;
+        }
+
+        function onRawJsonChange(value) {
+            try {
+                paramValues = JSON.parse(value);
+            } catch (e) {
+                // 解析失败时保留原值
+            }
+        }
+
+        function generateMcpCurl(mcpUrl, method, params) {
+            const sessionId = 'test-session-' + Math.random().toString(36).substring(2, 10);
+            const requestBody = {
+                jsonrpc: "2.0",
+                id: 1,
+                method: method,
+                params: params
+            };
+            return `curl -X POST "${mcpUrl}?sessionId=${sessionId}" \\
+  -H "Accept: application/json, text/event-stream" \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify(requestBody, null, 2).replace(/'/g, "'\\''")}'`;
+        }
+
+        async function runTest() {
+            const service = services.find(s => s.name === selectedService);
+            if (!service || !selectedTestItem) return;
+
+            testLoading = true;
+            testResult = null;
+            lastCurlCommand = '';
+            renderServiceDetail();
+
+            try {
+                let endpoint = '';
+                let body = {};
+                let mcpMethod = '';
+                let mcpParams = {};
+
+                if (testType === 'tool') {
+                    endpoint = '/api/test/tool';
+                    body = {
+                        service_name: service.name,
+                        tool_name: selectedTestItem,
+                        arguments: paramValues,
+                    };
+                    mcpMethod = 'tools/call';
+                    mcpParams = {
+                        name: selectedTestItem,
+                        arguments: paramValues
+                    };
+                } else if (testType === 'resource') {
+                    endpoint = '/api/test/resource';
+                    body = {
+                        service_name: service.name,
+                        uri: selectedTestItem,
+                    };
+                    mcpMethod = 'resources/read';
+                    mcpParams = {
+                        uri: selectedTestItem
+                    };
+                } else {
+                    endpoint = '/api/test/prompt';
+                    body = {
+                        service_name: service.name,
+                        prompt_name: selectedTestItem,
+                        arguments: paramValues,
+                    };
+                    mcpMethod = 'prompts/get';
+                    mcpParams = {
+                        name: selectedTestItem,
+                        arguments: paramValues
+                    };
+                }
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+
+                const data = await response.json();
+                testResult = data;
+
+                if (data.mcp_url) {
+                    lastCurlCommand = generateMcpCurl(data.mcp_url, mcpMethod, mcpParams);
+                }
+            } catch (error) {
+                testResult = { success: false, error: error.message };
+            }
+
+            testLoading = false;
+            renderServiceDetail();
+        }
+
+        function resetTest() {
+            paramValues = {};
+            testResult = null;
+            selectedTestItem = '';
+            renderServiceDetail();
+        }
+
+        function renderTestResult() {
+            if (!testResult) return '';
+
+            const isSuccess = testResult.success;
+            const resultData = testResult.result;
+            const isMarkdown = typeof resultData === 'string' && (
+                resultData.includes('# ') ||
+                resultData.includes('## ') ||
+                resultData.includes('- ') ||
+                resultData.includes('**')
+            );
+
+            return `
+                ${lastCurlCommand ? `
+                    <div class="test-result" style="margin-bottom: 16px;">
+                        <div class="test-result-header" style="background: rgba(16, 185, 129, 0.1);">
+                            <span>📋 MCP CURL 命令</span>
+                            <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;" onclick="copyCurlCommand()">
+                                📋 复制
+                            </button>
+                        </div>
+                        <div class="test-result-body">
+                            <pre class="result-text" style="color: var(--secondary);">${lastCurlCommand}</pre>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="test-result">
+                    <div class="test-result-header">
+                        <span>响应结果</span>
+                        <span class="test-result-status ${isSuccess ? 'status-success' : 'status-error'}">
+                            ${isSuccess ? '✅ 成功' : '❌ 失败'}
+                        </span>
+                    </div>
+                    <div class="test-result-body">
+                        ${isSuccess && isMarkdown ? `
+                            <div class="result-markdown">${simpleMarkdown(resultData)}</div>
+                        ` : `
+                            <pre class="result-text">${typeof testResult.result === 'string' ? testResult.result : (testResult.error || JSON.stringify(testResult, null, 2))}</pre>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyCurlCommand() {
+            if (lastCurlCommand) {
+                navigator.clipboard.writeText(lastCurlCommand);
+                alert('CURL命令已复制到剪贴板！');
+            }
+        }
+
+        function simpleMarkdown(text) {
+            let html = text
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // 处理列表
+            const lines = html.split('\n');
+            let inUl = false;
+            let result = [];
+
+            for (let line of lines) {
+                if (/^[-*] /.test(line)) {
+                    if (!inUl) { result.push('<ul>'); inUl = true; }
+                    result.push('<li>' + line.replace(/^[-*] /, '') + '</li>');
+                } else {
+                    if (inUl) { result.push('</ul>'); inUl = false; }
+                    if (line.trim()) result.push('<p>' + line + '</p>');
+                }
+            }
+            if (inUl) result.push('</ul>');
+
+            return result.join('\n');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderServiceList);
+        fetchServices();
+    </script>
+</body>
+</html>
