@@ -22,7 +22,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/mcp_manager.git
+git clone https://github.com/pfytlm/mcp_manager.git
 cd mcp_manager
 
 # 使用 uv 安装依赖
@@ -55,8 +55,11 @@ cp .env.example .env
 ### 启动服务
 
 ```bash
-# 启动所有服务
-./start_all.sh
+# 启动所有服务（推荐）
+./start.sh
+
+# HTTP 模式启动
+HTTP_MODE=true ./start.sh
 
 # 或分别启动
 uv run api-to-mcp serve-api          # REST API 服务 (8000)
@@ -96,6 +99,193 @@ src/api_to_mcp/
 └── static/
     └── index.html      # 管理后台前端页面
 ```
+
+## 🏗️ 架构设计
+
+### 模块调用关系
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          启动入口层 (cli.py)                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐           │
+│  │ serve_api()     │  │ serve_mcp()     │  │ serve_ui()      │           │
+│  │ todo_api.py     │  │ todo_mcp.py     │  │ manager.py      │           │
+│  │ calc_api.py     │  │ calc_mcp.py     │  │                 │           │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘           │
+└───────────┼────────────────────┼────────────────────┼─────────────────────┘
+            │                    │                    │
+            ▼                    ▼                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           核心框架层 (core.py)                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  create_mcp_server_from_api()                                        │   │
+│  │  ├── FastMCP(server_name, instructions)                              │   │
+│  │  ├── MCPToolBuilder(base_url, headers, verify_ssl)                   │   │
+│  │  │   └── httpx.AsyncClient → REST API                                │   │
+│  │  └── mcp.tool() → 动态注册工具函数                                    │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  build_service_metadata() → 返回服务元数据字典                         │   │
+│  │  └── 调用 registry.py 数据结构                                        │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+            │                    │                    │
+            ▼                    ▼                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          元数据层 (registry.py)                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐ ┌───────────────┐ ┌──────────────┐ ┌─────────────────────┐ │
+│  │ MCPToolInfo │ │MCPResourceInfo│ │ MCPPromptInfo│ │MCPServiceDefinition │ │
+│  └──────┬──────┘ └───────┬───────┘ └──────┬───────┘ └──────────┬──────────┘ │
+│         │                │                │                   │            │
+│         └────────────────┼────────────────┘                   │            │
+│                          ▼                                    │            │
+│              ┌─────────────────────┐                          │            │
+│              │ MCPServiceRegistry  │◄─────────────────────────┘            │
+│              │ - register()        │                                       │
+│              │ - get()             │                                       │
+│              │ - list_services()   │                                       │
+│              └─────────────────────┘                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+            │                    │                    │
+            ▼                    ▼                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           配置层 (config.py)                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  PlatformConfig (dataclass)                                        │   │
+│  │  ├── PLATFORM_HOST / PORT / SCHEME                                 │   │
+│  │  ├── TODO_API_HOST / PORT / SCHEME                                 │   │
+│  │  ├── CALC_API_HOST / PORT / SCHEME                                 │   │
+│  │  ├── TODO_MCP_HOST / PORT / SCHEME                                 │   │
+│  │  ├── CALC_MCP_HOST / PORT / SCHEME                                 │   │
+│  │  └── SSL_CERT_PATH / SSL_KEY_PATH                                  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  config = PlatformConfig()  # 全局单例                               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+            │                    │                    │
+            ▼                    ▼                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    服务启动层 (sse_server.py / manager.py)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────────────────────┐      ┌──────────────────────────────┐    │
+│  │        sse_server.py         │      │        manager.py            │    │
+│  │  ┌────────────────────────┐  │      │  ┌────────────────────────┐  │    │
+│  │  │ create_mcp_server()    │  │      │  │ create_manager_app()    │  │    │
+│  │  │ └── todo_mcp.py        │  │      │  │ └── FastAPI             │  │    │
+│  │  │ └── calc_mcp.py        │  │      │  │ └── /api/services       │  │    │
+│  │  ├────────────────────────┤  │      │  │ └── /api/test/tool      │  │    │
+│  │  │ create_mcp_sse_app()   │  │      │  │ └── /api/test/resource  │  │    │
+│  │  │ create_mcp_http_app()  │  │      │  │ └── /api/test/prompt    │  │    │
+│  │  └────────────────────────┘  │      │  ├────────────────────────┤  │    │
+│  │  返回 FastAPI 应用给 uvicorn │      │  │ register_example_       │  │    │
+│  │                              │      │  │ services()              │  │    │
+│  └──────────────────────────────┘      │  │ └── todo_mcp.py         │  │    │
+│                                        │  │ └── calc_mcp.py         │  │    │
+│                                        │  └────────────────────────┘  │    │
+│                                        └──────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 模块职责和调用关系表
+
+| 模块 | 职责 | 被谁调用 | 调用谁 |
+|------|------|----------|--------|
+| **cli.py** | 命令行入口，启动各服务 | 用户终端 | `todo_api`, `todo_mcp`, `manager`, `uvicorn` |
+| **config.py** | 全局配置管理 (.env 加载) | `manager`, `sse_server`, `todo_mcp`, `calc_mcp` | `dotenv` |
+| **core.py** | API→MCP 转换核心框架 | `todo_mcp`, `calc_mcp` | `FastMCP`, `httpx`, `registry` |
+| **registry.py** | MCP 服务注册中心，数据结构定义 | `core`, `manager` | 无（纯数据层） |
+| **manager.py** | 管理后台 FastAPI 应用 | `cli`, `uvicorn` | `registry`, `config`, `mcp.client` |
+| **sse_server.py** | MCP HTTP/SSE 服务启动 | `uvicorn`（工厂模式） | `todo_mcp`, `calc_mcp`, `config` |
+
+### 核心调用流程
+
+#### 流程 1：创建 MCP 服务
+
+```
+cli.serve_mcp()
+    │
+    ▼
+todo_mcp.create_todo_mcp_server()
+    │
+    ▼
+core.create_mcp_server_from_api()
+    │
+    ├── FastMCP(server_name, instructions)    ← 创建 MCP 服务器
+    ├── MCPToolBuilder(base_url, verify_ssl)  ← 创建 API 调用器
+    │       │
+    │       ▼
+    │   httpx.AsyncClient → REST API
+    │
+    └── mcp.tool()(tool_fn)                   ← 动态注册工具
+```
+
+#### 流程 2：管理后台获取服务列表
+
+```
+manager.create_manager_app()
+    │
+    ▼
+manager.register_example_services()
+    │
+    ├── todo_mcp.get_todo_service_metadata()
+    │       │
+    │       ▼
+    │   core.build_service_metadata()
+    │       │
+    │       ▼
+    │   registry.MCPToolInfo / MCPResourceInfo / MCPPromptInfo
+    │
+    └── registry.register(service)            ← 注册到全局注册中心
+
+    │
+    ▼
+manager.list_services()
+    │
+    ▼
+registry.get_registry().list_services()       ← 返回所有已注册服务
+```
+
+#### 流程 3：测试 MCP 工具调用
+
+```
+前端 → manager /api/test/tool
+    │
+    ▼
+manager._call_mcp_tool(mcp_url, tool_name, arguments)
+    │
+    ▼
+mcp.client.streamable_http.streamable_http_client()
+    │
+    ▼
+mcp.ClientSession
+    │
+    ├── session.initialize()                  ← 获取 sessionId
+    └── session.call_tool(tool_name, args)    ← 调用 MCP 工具
+            │
+            ▼
+        MCP Server (8001/8003)
+            │
+            ▼
+        core.MCPToolBuilder.call_endpoint()
+            │
+            ▼
+        REST API (8000/8002)
+```
+
+### 架构设计要点
+
+1. **协议层与业务层分离**：`core.py` 只负责 API→MCP 的转换逻辑，不关心具体业务
+2. **元数据驱动**：通过 `registry.py` 的数据结构，实现 UI 自动渲染和服务发现
+3. **配置集中管理**：`config.py` 提供全局配置单例，所有模块共享同一配置
+4. **工厂模式**：`sse_server.py` 提供工厂函数，支持 uvicorn 的 `--factory` 参数启动
+5. **服务注册模式**：`registry.py` 使用单例模式，管理后台和 MCP 服务共享服务定义
 
 ## 🔧 CLI 命令
 
