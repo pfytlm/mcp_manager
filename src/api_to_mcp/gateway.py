@@ -4,8 +4,7 @@
 通过 URL 路径前缀区分不同服务
 
 URL 结构:
-  /                    -> 管理后台 UI
-  /admin/api/...       -> 管理后台 API
+  /                    -> 管理后台 UI + API
   /mcp                 -> MCP 网关首页
   /mcp/todo            -> TODO MCP 服务
   /mcp/calc            -> 计算器 MCP 服务
@@ -72,56 +71,25 @@ def create_unified_gateway() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # 注册示例服务（管理后台需要）
     register_example_services()
 
-    # === MCP 服务 ===
-    # /mcp/todo -> TODO MCP
-    todo_mcp_app = _create_mcp_app("todo")
-    app.mount("/mcp/todo", todo_mcp_app, name="todo-mcp")
+    app.mount("/mcp/todo", _create_mcp_app("todo"), name="todo-mcp")
     print("✅ 已挂载: /mcp/todo -> TODO MCP 服务")
 
-    # /mcp/calc -> 计算器 MCP
-    calc_mcp_app = _create_mcp_app("calc")
-    app.mount("/mcp/calc", calc_mcp_app, name="calc-mcp")
+    app.mount("/mcp/calc", _create_mcp_app("calc"), name="calc-mcp")
     print("✅ 已挂载: /mcp/calc -> 计算器 MCP 服务")
 
-    # === REST API 服务 ===
-    # /api/todo -> TODO REST API
     app.mount("/api/todo", todo_api_app, name="todo-api")
     print("✅ 已挂载: /api/todo -> TODO REST API")
 
-    # /api/calc -> 计算器 REST API
     app.mount("/api/calc", calc_api_app, name="calc-api")
     print("✅ 已挂载: /api/calc -> 计算器 REST API")
-
-    # === 管理后台 ===
-    # /admin/api -> 管理后台 API
-    manager_app = create_manager_app()
-    app.mount("/admin", manager_app, name="manager")
-    print("✅ 已挂载: /admin -> 管理后台")
-
-    # === 根路径重定向 ===
-    @app.get("/")
-    async def root():
-        return JSONResponse(
-            content={
-                "message": "MCP Manager Platform",
-                "services": {
-                    "admin_ui": "/admin",
-                    "admin_api": "/admin/api/services",
-                    "mcp_gateway": "/mcp",
-                    "mcp_todo": "/mcp/todo",
-                    "mcp_calc": "/mcp/calc",
-                    "api_todo": "/api/todo",
-                    "api_calc": "/api/calc",
-                }
-            }
-        )
 
     @app.get("/health")
     async def health_check():
         return {"status": "healthy"}
+
+    print("✅ 已挂载: /health -> 健康检查")
 
     @app.get("/mcp")
     async def mcp_gateway():
@@ -129,17 +97,17 @@ def create_unified_gateway() -> FastAPI:
             content={
                 "message": "MCP Service Gateway",
                 "services": {
-                    "todo": {
-                        "name": "todo-mcp-server",
-                        "endpoint": "/mcp/todo",
-                    },
-                    "calc": {
-                        "name": "calculator-mcp-server",
-                        "endpoint": "/mcp/calc",
-                    },
+                    "todo": {"name": "todo-mcp-server", "endpoint": "/mcp/todo"},
+                    "calc": {"name": "calculator-mcp-server", "endpoint": "/mcp/calc"},
                 }
             }
         )
+
+    print("✅ 已挂载: /mcp -> MCP 网关首页")
+
+    manager_app = create_manager_app()
+    app.mount("/", manager_app, name="manager")
+    print("✅ 已挂载: / -> 管理后台")
 
     return app
 
@@ -157,7 +125,7 @@ def run_unified_gateway(host: str = "0.0.0.0", port: int = 8080):
     protocol = "https" if ssl_opts else "http"
     print(f"\n🚀 MCP Manager 统一网关启动")
     print(f"   地址: {protocol}://{host}:{port}")
-    print(f"   管理后台: {protocol}://{host}:{port}/admin")
+    print(f"   管理后台: {protocol}://{host}:{port}/")
     print(f"   MCP网关:  {protocol}://{host}:{port}/mcp")
     print(f"   TODO MCP: {protocol}://{host}:{port}/mcp/todo")
     print(f"   计算器MCP: {protocol}://{host}:{port}/mcp/calc")

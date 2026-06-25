@@ -43,11 +43,11 @@ echo ""
 echo "=== 服务状态检查 ==="
 
 if [ "$HTTP_MODE" = "true" ]; then
-    echo -n "网关首页 (${PORT}):       "
+    echo -n "健康检查 /health:       "
     curl -s http://127.0.0.1:${PORT}/health | grep -q healthy && echo "✅" || echo "❌"
 
-    echo -n "管理后台 /admin:        "
-    curl -s http://127.0.0.1:${PORT}/admin/api/services | grep -q total && echo "✅" || echo "❌"
+    echo -n "管理后台 /api/services: "
+    curl -s http://127.0.0.1:${PORT}/api/services | grep -q total && echo "✅" || echo "❌"
 
     echo -n "MCP网关 /mcp:          "
     curl -s http://127.0.0.1:${PORT}/mcp | grep -q todo && echo "✅" || echo "❌"
@@ -64,11 +64,11 @@ if [ "$HTTP_MODE" = "true" ]; then
     echo -n "计算器API /api/calc:   "
     curl -s http://127.0.0.1:${PORT}/api/calc/health | grep -q healthy && echo "✅" || echo "❌"
 else
-    echo -n "网关首页 (${PORT}):       "
+    echo -n "健康检查 /health:       "
     curl -s -k https://127.0.0.1:${PORT}/health | grep -q healthy && echo "✅" || echo "❌"
 
-    echo -n "管理后台 /admin:        "
-    curl -s -k https://127.0.0.1:${PORT}/admin/api/services | grep -q total && echo "✅" || echo "❌"
+    echo -n "管理后台 /api/services: "
+    curl -s -k https://127.0.0.1:${PORT}/api/services | grep -q total && echo "✅" || echo "❌"
 
     echo -n "MCP网关 /mcp:          "
     curl -s -k https://127.0.0.1:${PORT}/mcp | grep -q todo && echo "✅" || echo "❌"
@@ -88,7 +88,7 @@ fi
 
 echo ""
 echo "=== 部署完成 ==="
-echo "管理后台:   ${PROTOCOL}://mcp.pfytlm.top/admin"
+echo "管理后台:   ${PROTOCOL}://mcp.pfytlm.top/"
 echo "MCP网关:    ${PROTOCOL}://mcp.pfytlm.top/mcp"
 echo "TODO MCP:   ${PROTOCOL}://mcp.pfytlm.top/mcp/todo"
 echo "计算器MCP:  ${PROTOCOL}://mcp.pfytlm.top/mcp/calc"
