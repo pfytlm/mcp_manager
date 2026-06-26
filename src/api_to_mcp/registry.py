@@ -44,6 +44,7 @@ class MCPServiceDefinition:
     resources: List[MCPResourceInfo] = field(default_factory=list)
     prompts: List[MCPPromptInfo] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
+    auth_type: Optional[str] = None
 
 
 class MCPServiceRegistry:

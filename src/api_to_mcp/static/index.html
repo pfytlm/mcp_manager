@@ -59,6 +59,12 @@
             align-items: center;
         }
 
+        .header-nav {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-top: 0.75rem;
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -98,6 +104,337 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            background: transparent;
+            border-bottom: none;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-light);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab-content {
+            display: none;
+        }
+
+        .nav-tab-content.active {
+            display: block;
+        }
+
+        .key-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .key-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .key-card.default {
+            border-color: var(--secondary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .key-info {
+            flex: 1;
+        }
+
+        .key-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .key-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .key-value {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .key-date {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+        }
+
+        .key-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: monospace;
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .empty-state-small {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-dim);
+        }
+
+        .json-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .json-tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .json-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .service-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-list-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary-dark);
+        }
+
+        .keys-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .keys-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .keys-title {
+            font-size: 1.5rem;
+            font-weight: 700;
         }
 
         .container {
@@ -239,14 +576,6 @@
             margin-top: 0.5rem;
         }
 
-        .tag {
-            font-size: 0.7rem;
-            padding: 0.15rem 0.5rem;
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--primary-light);
-            border-radius: 4px;
-        }
-
         .main-content {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -276,14 +605,14 @@
 
         .detail-info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem 1.5rem;
         }
 
         .info-item {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.35rem;
         }
 
         .info-label {
@@ -291,22 +620,41 @@
             color: var(--text-dim);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .info-value {
             font-size: 0.9rem;
             font-family: 'SF Mono', 'Fira Code', monospace;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .info-value code {
             background: rgba(99, 102, 241, 0.15);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
             color: var(--primary-light);
             font-size: 0.85rem;
+            word-break: break-all;
+            flex: 1;
+            overflow-wrap: break-word;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-light);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
         .tabs {
@@ -841,36 +1189,65 @@
                 </div>
             </div>
         </div>
+        <div class="header-nav">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchNavTab('services')">📋 服务管理</button>
+                <button class="nav-tab" onclick="switchNavTab('tokens')">🔑 Token 管理</button>
+            </div>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="sidebar">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="搜索MCP服务...">
+    <div id="tab-services" class="nav-tab-content active">
+        <div class="container">
+            <div class="sidebar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="搜索MCP服务...">
+                </div>
+                <div class="service-list-header">
+                    <span class="service-list-title">服务列表</span>
+                    <button class="btn-icon" onclick="openAddServiceModal()" title="添加服务">+</button>
+                </div>
+                <div class="service-list" id="serviceList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        加载中...
+                    </div>
+                </div>
             </div>
-            <div class="service-list" id="serviceList">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    加载中...
+
+            <div class="main-content" id="mainContent">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h2 style="margin-bottom: 0.5rem; color: var(--text);">选择一个MCP服务</h2>
+                    <p>从左侧列表中选择一个服务查看详细配置</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="main-content" id="mainContent">
-            <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <h2 style="margin-bottom: 0.5rem; color: var(--text);">选择一个MCP服务</h2>
-                <p>从左侧列表中选择一个服务查看详细配置</p>
+    <div id="tab-tokens" class="nav-tab-content">
+        <div class="keys-container">
+            <div class="keys-header">
+                <div class="keys-title">🔑 Token 管理</div>
+                <button class="btn btn-primary" onclick="openAddTokenModal()">+ 新增 Token</button>
+            </div>
+            <div id="keysList">
+                <div class="empty-state-small">加载中...</div>
             </div>
         </div>
     </div>
+
+    <div id="modalContainer"></div>
 
     <script>
         let services = [];
         let selectedService = null;
         let activeTab = 'tools';
         let expandedTools = new Set();
+        let apiKeys = [];
+        let selectedKeyId = null;
+        let currentTab = 'services';
 
         const methodColors = {
             GET: 'get',
@@ -879,6 +1256,397 @@
             DELETE: 'delete',
             PATCH: 'patch'
         };
+
+        function switchNavTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab-content').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            if (tab === 'tokens') {
+                fetchKeys();
+            }
+        }
+
+        async function fetchKeys() {
+            try {
+                const res = await fetch('/api/keys');
+                const data = await res.json();
+                apiKeys = data.keys;
+                renderKeysList();
+            } catch (e) {
+                document.getElementById('keysList').innerHTML = `
+                    <div class="empty-state-small">加载失败: ${e.message}</div>
+                `;
+            }
+        }
+
+        function renderKeysList() {
+            const container = document.getElementById('keysList');
+            if (apiKeys.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state-small">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔑</div>
+                        <p>暂无 API Token，点击右上角新增</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = apiKeys.map(key => `
+                <div class="key-card ${key.is_default ? 'default' : ''}">
+                    <div class="key-info">
+                        <div class="key-name">
+                            ${key.name}
+                            ${key.is_default ? '<span class="key-badge">默认</span>' : ''}
+                        </div>
+                        <div class="key-value">${key.key_prefix}</div>
+                        <div class="key-date">创建于 ${new Date(key.created_at).toLocaleString('zh-CN')}</div>
+                    </div>
+                    <div class="key-actions">
+                        ${!key.is_default ? `<button class="btn btn-secondary btn-sm" onclick="setDefaultKey('${key.id}')">设为默认</button>` : ''}
+                        <button class="btn btn-secondary btn-sm" onclick="openEditTokenModal('${key.id}')">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteKey('${key.id}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddTokenModal() {
+            const html = `
+                <div class="modal-overlay" onclick="closeModal(event)">
+                    <div class="modal" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <div class="modal-title">新增 API Token</div>
+                            <button class="modal-close" onclick="closeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Token 名称</label>
+                                <input type="text" class="form-input" id="newKeyName" placeholder="例如：生产环境Token">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Token 值（留空自动生成）</label>
+                                <input type="text" class="form-input" id="newKeyValue" placeholder="留空将自动生成随机Token">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" id="newKeyDefault">
+                                    <span>设为默认 Token</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                            <button class="btn btn-primary" onclick="createKey()">创建</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modalContainer').innerHTML = html;
+        }
+
+        async function createKey() {
+            const name = document.getElementById('newKeyName').value.trim();
+            const key = document.getElementById('newKeyValue').value.trim();
+            const isDefault = document.getElementById('newKeyDefault').checked;
+
+            if (!name) {
+                alert('请输入Token名称');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, key, is_default: isDefault })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Token创建成功！\n\nToken: ${data.key.key}\n\n请妥善保存，只显示一次！`);
+                    closeModal();
+                    fetchKeys();
+                    loadKeysForTest();
+                } else {
+                    alert('创建失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (e) {
+                alert('创建失败: ' + e.message);
+            }
+        }
+
+        let _editingKeyId = null;
+
+        function openEditTokenModal(keyId) {
+            const key = apiKeys.find(k => k.id === keyId);
+            if (!key) return;
+            _editingKeyId = keyId;
+
+            const html = `
+                <div class="modal-overlay" onclick="closeModal(event)">
+                    <div class="modal" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <div class="modal-title">编辑 API Token</div>
+                            <button class="modal-close" onclick="closeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Token 名称</label>
+                                <input type="text" class="form-input" id="editKeyName" value="${key.name}" placeholder="例如：生产环境Token">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Token 前缀</label>
+                                <input type="text" class="form-input" value="${key.key_prefix}" disabled>
+                                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">Token 本身不可修改，只能修改名称</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" id="editKeyDefault" ${key.is_default ? 'checked' : ''}>
+                                    <span>设为默认 Token</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                            <button class="btn btn-primary" onclick="updateKey()">保存</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modalContainer').innerHTML = html;
+        }
+
+        async function updateKey() {
+            const name = document.getElementById('editKeyName').value.trim();
+            const isDefault = document.getElementById('editKeyDefault').checked;
+
+            if (!name) {
+                alert('请输入Token名称');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/keys/${_editingKeyId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, is_default: isDefault })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal();
+                    fetchKeys();
+                    loadKeysForTest();
+                } else {
+                    alert('更新失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (e) {
+                alert('更新失败: ' + e.message);
+            }
+        }
+
+        async function setDefaultKey(keyId) {
+            try {
+                const res = await fetch(`/api/keys/${keyId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_default: true })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchKeys();
+                } else {
+                    alert('设置失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (e) {
+                alert('设置失败: ' + e.message);
+            }
+        }
+
+        async function deleteKey(keyId) {
+            if (!confirm('确定要删除这个Key吗？')) return;
+            try {
+                const res = await fetch(`/api/keys/${keyId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    fetchKeys();
+                } else {
+                    alert('删除失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (e) {
+                alert('删除失败: ' + e.message);
+            }
+        }
+
+        function openAddServiceModal() {
+            const html = `
+                <div class="modal-overlay" onclick="closeModal(event)">
+                    <div class="modal" onclick="event.stopPropagation()" style="max-width: 700px;">
+                        <div class="modal-header">
+                            <div class="modal-title">新增 MCP 服务</div>
+                            <button class="modal-close" onclick="closeModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="json-tabs">
+                                <button class="json-tab active" id="tabForm" onclick="switchServiceFormTab('form')">📝 表单方式</button>
+                                <button class="json-tab" id="tabJson" onclick="switchServiceFormTab('json')">📄 JSON 方式</button>
+                            </div>
+                            
+                            <div id="serviceFormPanel">
+                                <div class="form-group">
+                                    <label class="form-label">服务名称 *</label>
+                                    <input type="text" class="form-input" id="svcName" placeholder="例如：my-mcp-service">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">服务描述 *</label>
+                                    <input type="text" class="form-input" id="svcDesc" placeholder="服务功能描述">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">MCP 地址 *</label>
+                                    <input type="text" class="form-input" id="svcUrl" placeholder="https://example.com/mcp">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">传输方式</label>
+                                        <select class="form-input" id="svcTransport">
+                                            <option value="streamable-http">streamable-http</option>
+                                            <option value="stdio">stdio</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">认证方式</label>
+                                        <select class="form-input" id="svcAuthType">
+                                            <option value="">无认证</option>
+                                            <option value="Bearer Token">Bearer Token</option>
+                                            <option value="API Key">API Key</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">系统提示词 (Instructions)</label>
+                                    <textarea class="form-textarea" id="svcInstructions" placeholder="AI助手的角色定义和使用说明..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">标签（逗号分隔）</label>
+                                    <input type="text" class="form-input" id="svcTags" placeholder="示例,工具,生产">
+                                </div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="loadServiceExample()">📋 加载示例</button>
+                                </div>
+                            </div>
+                            
+                            <div id="serviceJsonPanel" style="display:none;">
+                                <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">粘贴完整的服务定义JSON：</span>
+                                    <button class="btn btn-secondary btn-sm" onclick="loadServiceExample()">📋 加载示例</button>
+                                </div>
+                                <textarea class="form-textarea" id="svcJson" style="min-height: 350px;" placeholder='{"name": "...", "description": "...", ...}'></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                            <button class="btn btn-primary" onclick="createService()">创建服务</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modalContainer').innerHTML = html;
+        }
+
+        function switchServiceFormTab(tab) {
+            document.getElementById('tabForm').classList.toggle('active', tab === 'form');
+            document.getElementById('tabJson').classList.toggle('active', tab === 'json');
+            document.getElementById('serviceFormPanel').style.display = tab === 'form' ? 'block' : 'none';
+            document.getElementById('serviceJsonPanel').style.display = tab === 'json' ? 'block' : 'none';
+        }
+
+        async function loadServiceExample() {
+            try {
+                const res = await fetch('/api/services/example/sample');
+                const data = await res.json();
+                const jsonStr = JSON.stringify(data, null, 2);
+                
+                if (document.getElementById('svcJson')) {
+                    document.getElementById('svcJson').value = jsonStr;
+                }
+                if (document.getElementById('svcName')) {
+                    document.getElementById('svcName').value = data.name;
+                    document.getElementById('svcDesc').value = data.description;
+                    document.getElementById('svcUrl').value = data.base_url;
+                    document.getElementById('svcTransport').value = data.transport;
+                    document.getElementById('svcAuthType').value = data.auth_type || '';
+                    document.getElementById('svcInstructions').value = data.instructions || '';
+                    document.getElementById('svcTags').value = (data.tags || []).join(', ');
+                }
+            } catch (e) {
+                alert('加载示例失败: ' + e.message);
+            }
+        }
+
+        async function createService() {
+            let serviceData;
+            
+            const jsonTabActive = document.getElementById('tabJson').classList.contains('active');
+            
+            if (jsonTabActive) {
+                try {
+                    serviceData = JSON.parse(document.getElementById('svcJson').value);
+                } catch (e) {
+                    alert('JSON格式错误: ' + e.message);
+                    return;
+                }
+            } else {
+                const name = document.getElementById('svcName').value.trim();
+                const description = document.getElementById('svcDesc').value.trim();
+                const base_url = document.getElementById('svcUrl').value.trim();
+                const transport = document.getElementById('svcTransport').value;
+                const auth_type = document.getElementById('svcAuthType').value || null;
+                const instructions = document.getElementById('svcInstructions').value.trim() || null;
+                const tags = document.getElementById('svcTags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+                if (!name || !description || !base_url) {
+                    alert('请填写必填项（名称、描述、地址）');
+                    return;
+                }
+
+                serviceData = {
+                    name,
+                    description,
+                    base_url,
+                    transport,
+                    auth_type,
+                    instructions,
+                    tags,
+                    tools: [],
+                    resources: [],
+                    prompts: []
+                };
+            }
+
+            try {
+                const res = await fetch('/api/services', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serviceData)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('服务创建成功！');
+                    closeModal();
+                    fetchServices();
+                } else {
+                    alert('创建失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (e) {
+                alert('创建失败: ' + e.message);
+            }
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('modalContainer').innerHTML = '';
+        }
 
         async function fetchServices() {
             try {
@@ -973,7 +1741,10 @@
                     <div class="detail-info-grid">
                         <div class="info-item">
                             <span class="info-label">MCP 地址</span>
-                            <span class="info-value" title="${service.base_url}"><code>${service.base_url}</code></span>
+                            <span class="info-value" title="${service.base_url}">
+                                <code>${service.base_url}</code>
+                                <button class="copy-btn" onclick="copyToClipboard('${service.base_url}')" title="复制地址">📋</button>
+                            </span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">传输方式</span>
@@ -1119,22 +1890,24 @@
         }
 
         function renderConfig(service) {
+            const configObj = {
+                name: service.name,
+                description: service.description,
+                base_url: service.base_url,
+                transport: service.transport,
+                has_auth: service.has_auth,
+                auth_type: service.auth_type,
+                tags: service.tags,
+                tools_count: service.tools.length,
+                resources_count: service.resources.length,
+                prompts_count: service.prompts.length,
+            };
+            const configJson = JSON.stringify(configObj, null, 2);
             return `
                 <div class="section-title">服务配置 (JSON)</div>
                 <div class="schema-box" style="position: relative;">
                     <button class="copy-btn" style="position: absolute; top: 0.75rem; right: 0.75rem;" onclick="copyConfig()">📋 复制</button>
-                    ${JSON.stringify({
-                        name: service.name,
-                        description: service.description,
-                        base_url: service.base_url,
-                        transport: service.transport,
-                        has_auth: service.has_auth,
-                        auth_type: service.auth_type,
-                        tags: service.tags,
-                        tools_count: service.tools.length,
-                        resources_count: service.resources.length,
-                        prompts_count: service.prompts.length,
-                    }, null, 2)}
+                    <pre style="margin: 0; padding: 0;"><code>${escapeHtml(configJson)}</code></pre>
                 </div>
 
                 <div class="section-title" style="margin-top: 1.5rem;">AI 助手系统提示词 (Instructions)</div>
@@ -1149,6 +1922,19 @@
             }
         }
 
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.currentTarget;
+                const originalText = btn.textContent;
+                btn.textContent = '✅';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
+        }
+
         // ============================================================
         // 🔬 MCP请求测试工具
         // ============================================================
@@ -1157,6 +1943,22 @@
         let testResult = null;
         let testLoading = false;
         let lastCurlCommand = '';
+        let authToken = '';
+        let selectedTestKeyId = '';
+
+        async function loadKeysForTest() {
+            try {
+                const res = await fetch('/api/keys');
+                const data = await res.json();
+                apiKeys = data.keys;
+                const defaultKey = apiKeys.find(k => k.is_default);
+                if (defaultKey) {
+                    selectedTestKeyId = defaultKey.id;
+                }
+            } catch (e) {
+                console.warn('Failed to load keys for test:', e);
+            }
+        }
 
         function switchTestType(type) {
             testType = type;
@@ -1168,6 +1970,12 @@
         function renderTestPanel(service) {
             const items = getTestItems(service);
             const currentItem = getCurrentTestItem(service);
+
+            const keyOptions = (apiKeys || []).map(k => `
+                <option value="${k.id}" ${selectedTestKeyId === k.id ? 'selected' : ''}>
+                    ${k.name}${k.is_default ? ' (默认)' : ''} - ${k.key_prefix}
+                </option>
+            `).join('');
 
             return `
                 <div class="test-panel">
@@ -1181,6 +1989,19 @@
                         <button class="test-type-tab ${testType === 'prompt' ? 'active' : ''}" onclick="switchTestType('prompt')">
                             💬 获取提示词
                         </button>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">
+                            🔐 认证 Token（Bearer Token）
+                        </div>
+                        <select onchange="onSelectTestKey(this.value)" style="width: 100%; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9rem;">
+                            <option value="">-- 不使用 Token --</option>
+                            ${keyOptions}
+                        </select>
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px;">
+                            选择已注册的 Token，将作为 Bearer Token 添加到请求头 Authorization
+                        </div>
                     </div>
 
                     <div class="test-selector">
@@ -1252,6 +2073,12 @@
             } else {
                 return service.prompts.find(p => p.name === selectedTestItem);
             }
+        }
+
+        function onSelectTestKey(value) {
+            selectedTestKeyId = value;
+            testResult = null;
+            renderServiceDetail();
         }
 
         function onSelectTestItem(value) {
@@ -1328,6 +2155,17 @@
             }
         }
 
+        function onAuthTokenChange(value) {
+            authToken = value;
+        }
+
+        function toggleTokenVisibility() {
+            const input = document.getElementById('authTokenInput');
+            if (input) {
+                input.type = input.type === 'password' ? 'text' : 'password';
+            }
+        }
+
         function generateMcpCurl(mcpUrl, method, params) {
             const sessionId = 'test-session-' + Math.random().toString(36).substring(2, 10);
             const requestBody = {
@@ -1336,8 +2174,9 @@
                 method: method,
                 params: params
             };
+            const authHeader = authToken ? `-H "Authorization: Bearer ${authToken}" \\\n` : '';
             return `curl -X POST "${mcpUrl}?sessionId=${sessionId}" \\
-  -H "Accept: application/json, text/event-stream" \\
+${authHeader}  -H "Accept: application/json, text/event-stream" \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(requestBody, null, 2).replace(/'/g, "'\\''")}'`;
         }
@@ -1364,6 +2203,9 @@
                         tool_name: selectedTestItem,
                         arguments: paramValues,
                     };
+                    if (selectedTestKeyId) {
+                        body.key_id = selectedTestKeyId;
+                    }
                     mcpMethod = 'tools/call';
                     mcpParams = {
                         name: selectedTestItem,
@@ -1375,6 +2217,9 @@
                         service_name: service.name,
                         uri: selectedTestItem,
                     };
+                    if (selectedTestKeyId) {
+                        body.key_id = selectedTestKeyId;
+                    }
                     mcpMethod = 'resources/read';
                     mcpParams = {
                         uri: selectedTestItem
@@ -1386,6 +2231,9 @@
                         prompt_name: selectedTestItem,
                         arguments: paramValues,
                     };
+                    if (selectedTestKeyId) {
+                        body.key_id = selectedTestKeyId;
+                    }
                     mcpMethod = 'prompts/get';
                     mcpParams = {
                         name: selectedTestItem,
@@ -1393,16 +2241,22 @@
                     };
                 }
 
+                const headers = { 'Content-Type': 'application/json' };
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: headers,
                     body: JSON.stringify(body),
                 });
 
                 const data = await response.json();
                 testResult = data;
 
-                if (data.mcp_url) {
+                if (data.curl_command) {
+                    lastCurlCommand = data.curl_command;
+                } else if (data.mcp_url) {
                     lastCurlCommand = generateMcpCurl(data.mcp_url, mcpMethod, mcpParams);
                 }
             } catch (error) {
@@ -1442,7 +2296,7 @@
                             </button>
                         </div>
                         <div class="test-result-body">
-                            <pre class="result-text" style="color: var(--secondary);">${lastCurlCommand}</pre>
+                            <pre class="result-text" style="color: var(--secondary);">${escapeHtml(lastCurlCommand)}</pre>
                         </div>
                     </div>
                 ` : ''}
@@ -1458,7 +2312,7 @@
                         ${isSuccess && isMarkdown ? `
                             <div class="result-markdown">${simpleMarkdown(resultData)}</div>
                         ` : `
-                            <pre class="result-text">${typeof testResult.result === 'string' ? testResult.result : (testResult.error || JSON.stringify(testResult, null, 2))}</pre>
+                            <pre class="result-text">${escapeHtml(typeof testResult.result === 'string' ? testResult.result : (testResult.error || JSON.stringify(testResult, null, 2)))}</pre>
                         `}
                     </div>
                 </div>
@@ -1472,8 +2326,14 @@
             }
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
         function simpleMarkdown(text) {
-            let html = text
+            let html = escapeHtml(text)
                 .replace(/^### (.+)$/gm, '<h3>$1</h3>')
                 .replace(/^## (.+)$/gm, '<h2>$1</h2>')
                 .replace(/^# (.+)$/gm, '<h1>$1</h1>')
@@ -1501,6 +2361,7 @@
 
         document.getElementById('searchInput').addEventListener('input', renderServiceList);
         fetchServices();
+        loadKeysForTest();
     </script>
 </body>
 </html>

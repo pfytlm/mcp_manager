@@ -10,33 +10,72 @@ URL 结构:
   /mcp/calc            -> 计算器 MCP 服务
   /api/todo            -> TODO REST API
   /api/calc            -> 计算器 REST API
+
+认证方式:
+  Bearer Token 认证 (Authorization: Bearer <token>)
+  配置: MCP_AUTH_TOKENS=token1,token2
 """
 from __future__ import annotations
 
+import os
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from mcp.server.transport_security import TransportSecuritySettings
+from pathlib import Path
 
 from .config import config
 from .examples.todo_api import app as todo_api_app
 from .examples.calc_api import app as calc_api_app
 from .examples.todo_mcp import create_todo_mcp_server
 from .examples.calc_mcp import create_calc_mcp_server
-from .manager import create_manager_app, register_example_services
+from .manager import register_example_services
+
+
+def _get_valid_tokens() -> set[str]:
+    """获取有效的认证 token 集合"""
+    token_str = os.getenv("MCP_AUTH_TOKENS", "")
+    if not token_str:
+        return set()
+    return {t.strip() for t in token_str.split(",") if t.strip()}
+
+
+VALID_TOKENS = _get_valid_tokens()
+
+
+async def _auth_middleware(request: Request, call_next):
+    """Bearer Token 认证中间件"""
+    if not VALID_TOKENS:
+        return await call_next(request)
+
+    if request.url.path.startswith("/mcp/todo") or request.url.path.startswith("/mcp/calc"):
+        auth_header = request.headers.get("authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Unauthorized", "message": "Missing or invalid Authorization header"},
+            )
+        token = auth_header[7:]
+        if token not in VALID_TOKENS:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Unauthorized", "message": "Invalid token"},
+            )
+    return await call_next(request)
 
 
 def _create_mcp_app(service_key: str):
     """创建指定服务的 MCP streamable-http 应用"""
     if service_key == "todo":
         mcp_server, _ = create_todo_mcp_server(
-            base_url=f"{config.PLATFORM_SCHEME}://{config.PLATFORM_HOST}/api/todo",
+            base_url=config.todo_api_url,
             verify_ssl=False,
         )
     elif service_key == "calc":
         mcp_server, _ = create_calc_mcp_server(
-            base_url=f"{config.PLATFORM_SCHEME}://{config.PLATFORM_HOST}/api/calc",
+            base_url=config.calc_api_url,
             verify_ssl=False,
         )
     else:
@@ -47,7 +86,7 @@ def _create_mcp_app(service_key: str):
         allowed_hosts=[],
         allowed_origins=[],
     )
-    return mcp_server.streamable_http_app()
+    return mcp_server
 
 
 def create_unified_gateway() -> FastAPI:
@@ -71,12 +110,118 @@ def create_unified_gateway() -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.middleware("http")(_auth_middleware)
+
     register_example_services()
 
-    app.mount("/mcp/todo", _create_mcp_app("todo"), name="todo-mcp")
-    print("✅ 已挂载: /mcp/todo -> TODO MCP 服务")
+    import httpx
 
-    app.mount("/mcp/calc", _create_mcp_app("calc"), name="calc-mcp")
+    todo_mcp_server = _create_mcp_app("todo")
+    calc_mcp_server = _create_mcp_app("calc")
+
+    todo_mcp_port = 18001
+    calc_mcp_port = 18003
+
+    async def _start_mcp_servers():
+        import asyncio
+        from uvicorn import Config, Server
+
+        async def start_server(mcp_server, port):
+            config = Config(
+                app=mcp_server.streamable_http_app(),
+                host="127.0.0.1",
+                port=port,
+                loop="asyncio",
+                log_level="error",
+            )
+            server = Server(config)
+            await server.serve()
+
+        await asyncio.gather(
+            start_server(todo_mcp_server, todo_mcp_port),
+            start_server(calc_mcp_server, calc_mcp_port),
+        )
+
+    import asyncio
+    asyncio.create_task(_start_mcp_servers())
+
+    @app.post("/mcp/todo")
+    async def proxy_todo_mcp(request: Request):
+        from fastapi.responses import StreamingResponse
+        
+        async with httpx.AsyncClient(verify=False) as client:
+            headers = dict(request.headers)
+            headers.pop("host", None)
+            headers.pop("content-length", None)
+            
+            body = await request.body()
+            
+            response = await client.post(
+                f"http://127.0.0.1:{todo_mcp_port}/mcp",
+                content=body,
+                headers=headers,
+                timeout=30,
+            )
+            
+            response_headers = {k: v for k, v in response.headers.items() if k.lower() not in ["content-length", "transfer-encoding"]}
+            
+            return StreamingResponse(response.aiter_bytes(), status_code=response.status_code, headers=response_headers)
+
+    @app.post("/mcp/calc")
+    async def proxy_calc_mcp(request: Request):
+        from fastapi.responses import StreamingResponse
+        
+        async with httpx.AsyncClient(verify=False) as client:
+            headers = dict(request.headers)
+            headers.pop("host", None)
+            headers.pop("content-length", None)
+            
+            body = await request.body()
+            
+            response = await client.post(
+                f"http://127.0.0.1:{calc_mcp_port}/mcp",
+                content=body,
+                headers=headers,
+                timeout=30,
+            )
+            
+            response_headers = {k: v for k, v in response.headers.items() if k.lower() not in ["content-length", "transfer-encoding"]}
+            
+            return StreamingResponse(response.aiter_bytes(), status_code=response.status_code, headers=response_headers)
+
+    @app.get("/mcp/todo")
+    async def proxy_todo_mcp_get(request: Request):
+        async with httpx.AsyncClient(verify=False) as client:
+            headers = dict(request.headers)
+            headers.pop("host", None)
+            
+            response = await client.get(
+                f"http://127.0.0.1:{todo_mcp_port}/mcp",
+                headers=headers,
+                timeout=30,
+            )
+            
+            response_headers = {k: v for k, v in response.headers.items() if k.lower() not in ["content-length", "transfer-encoding"]}
+            
+            return StreamingResponse(response.aiter_bytes(), status_code=response.status_code, headers=response_headers)
+
+    @app.get("/mcp/calc")
+    async def proxy_calc_mcp_get(request: Request):
+        async with httpx.AsyncClient(verify=False) as client:
+            headers = dict(request.headers)
+            headers.pop("host", None)
+            
+            response = await client.get(
+                f"http://127.0.0.1:{calc_mcp_port}/mcp",
+                headers=headers,
+                timeout=30,
+            )
+            
+            response_headers = {k: v for k, v in response.headers.items() if k.lower() not in ["content-length", "transfer-encoding"]}
+            
+            return StreamingResponse(response.aiter_bytes(), status_code=response.status_code, headers=response_headers)
+
+    print("✅ 已挂载: /mcp/todo -> TODO MCP 服务")
     print("✅ 已挂载: /mcp/calc -> 计算器 MCP 服务")
 
     app.mount("/api/todo", todo_api_app, name="todo-api")
@@ -87,7 +232,7 @@ def create_unified_gateway() -> FastAPI:
 
     @app.get("/health")
     async def health_check():
-        return {"status": "healthy"}
+        return {"status": "healthy", "auth_enabled": len(VALID_TOKENS) > 0}
 
     print("✅ 已挂载: /health -> 健康检查")
 
@@ -96,6 +241,7 @@ def create_unified_gateway() -> FastAPI:
         return JSONResponse(
             content={
                 "message": "MCP Service Gateway",
+                "auth_enabled": len(VALID_TOKENS) > 0,
                 "services": {
                     "todo": {"name": "todo-mcp-server", "endpoint": "/mcp/todo"},
                     "calc": {"name": "calculator-mcp-server", "endpoint": "/mcp/calc"},
@@ -105,9 +251,30 @@ def create_unified_gateway() -> FastAPI:
 
     print("✅ 已挂载: /mcp -> MCP 网关首页")
 
-    manager_app = create_manager_app()
-    app.mount("/", manager_app, name="manager")
+    from .manager import create_manager_router, _init_api_keys
+
+    _init_api_keys()
+
+    manager_router = create_manager_router()
+    app.include_router(manager_router)
+
+    static_dir = Path(__file__).parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+        @app.get("/", response_class=HTMLResponse)
+        async def index():
+            index_file = static_dir / "index.html"
+            if index_file.exists():
+                return index_file.read_text(encoding="utf-8")
+            return HTMLResponse(content="<h1>MCP Manager</h1>")
+
     print("✅ 已挂载: / -> 管理后台")
+
+    if VALID_TOKENS:
+        print(f"🔒 认证已启用，共 {len(VALID_TOKENS)} 个有效 token")
+    else:
+        print("⚠️ 认证未启用 (MCP_AUTH_TOKENS 未配置)")
 
     return app
 
